@@ -3,17 +3,39 @@
     Алгоритм критического пути
 
 """
+import random
 
 
 def main(matrix: list[list[int]]) -> None:
+    while True:
+        try:
+            sort_mode = int(
+                input(
+                    "Как отсортировать?"
+                    "\n - 1: По убыванию;"
+                    "\n - 2. По возрастанию;"
+                    "\n - 3. Случайный порядок "
+                    "\n\nВведите номер: "
+                )
+            )
+            if sort_mode not in [1, 2, 3]:
+                raise ValueError
+            break
+        except ValueError:
+            print("Ошибка ввода, попробуйте снова")
+
     column = [0] * len(matrix)
     for i in range(len(matrix)):
         column[i] = matrix[i][0]
 
-    times = sorted(column, reverse=True)
+    if sort_mode in [1, 2]:
+        column.sort(reverse=sort_mode == 1)
+    else:
+        random.shuffle(column)
+
     for i in range(len(matrix)):
         for j in range(len(matrix[0])):
-            matrix[i][j] = times[i]
+            matrix[i][j] = column[i]
 
     print("\nОтсортированная матрица:")
     for row in matrix:
@@ -22,7 +44,7 @@ def main(matrix: list[list[int]]) -> None:
     processors = [[] for _ in range(len(matrix[0]))]
 
     step = 0
-    for time in times:
+    for time in column:
         step += 1
         min_load_processor = min(range(len(processors)), key=lambda index: sum(processors[index]))
         processors[min_load_processor].append(time)
