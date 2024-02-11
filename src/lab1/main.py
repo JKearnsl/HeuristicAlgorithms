@@ -1,9 +1,9 @@
 import random
 
 from lab1.algorithms import (
-    ahst,
+    hdmt,
     ce,
-    cpa,
+    cmp,
     opmt
 )
 
@@ -57,9 +57,9 @@ def main():
         request = input("Ввод: ")
         match request:
             case "1":
-                cpa.main(matrix)
+                cmp.main(matrix)
             case "2":
-                ahst.main(matrix)
+                hdmt.main(matrix)
             case "3":
                 opmt.main(matrix)
             case "4":
