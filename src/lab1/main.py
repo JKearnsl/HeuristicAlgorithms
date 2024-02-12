@@ -2,7 +2,6 @@ import random
 
 from lab1.algorithms import (
     hdmt,
-    ce,
     cmp,
     opmt
 )
@@ -51,8 +50,7 @@ def main():
         print("1. Алгоритм критического пути")
         print("2. Алгоритм половинного деления множества заданий")
         print("3. Упорядоченное разбиение множества заданий")
-        print("4. Вычислительные эксперименты")
-        print("5. Выход")
+        print("4. Выход")
 
         request = input("Ввод: ")
         match request:
@@ -63,8 +61,6 @@ def main():
             case "3":
                 opmt.main(matrix)
             case "4":
-                ce.main(matrix)
-            case "5":
                 break
             case _:
                 print("Неверный ввод, повторите попытку")
