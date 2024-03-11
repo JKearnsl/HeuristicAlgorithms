@@ -1,7 +1,8 @@
 import random
 
-from lab2.algorithms import (
-    acsul
+from lab3.algorithms import (
+    cm,
+    cm_modif
 )
 
 
@@ -33,10 +34,11 @@ def main():
             print("Введен неверный диапазон, повторите попытку")
             continue
 
+    column = tuple(random.randint(*sorted(random_range)) for _ in range(m))
     matrix = [[0 for _ in range(n)] for _ in range(m)]
     for i in range(m):
         for j in range(n):
-            matrix[i][j] = random.randint(*sorted(random_range))
+            matrix[i][j] = column[i]
 
     print("\nМатрица:")
     for row in matrix:
@@ -51,7 +53,9 @@ def main():
         request = input("Ввод: ")
         match request:
             case "1":
-                acsul.main(matrix)
+                cm.main(matrix)
+            case "2":
+                cm_modif.main(matrix)
             case "4":
                 break
             case _:
