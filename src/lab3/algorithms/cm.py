@@ -61,7 +61,7 @@ def main(matrix: list[list[int]]):
             is_founded_2 = False
             for i, one_from_max in enumerate(devices[max_device[1]]):
                 for j, one_from_min in enumerate(devices[min_device[1]]):
-                    if one_from_max < one_from_min:
+                    if one_from_max <= one_from_min:
                         continue
 
                     if is_founded_2:
