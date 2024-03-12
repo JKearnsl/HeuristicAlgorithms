@@ -9,10 +9,10 @@ from lab3.algorithms import (
 def main():
     while True:
         try:
-            n = int(input("Введите число процессоров: "))
+            n = int(input("Введите число устройств: "))
             break
         except ValueError:
-            print("Введено неверное значение процессоров, повторите попытку")
+            print("Введено неверное значение устройств, повторите попытку")
             continue
 
     while True:
