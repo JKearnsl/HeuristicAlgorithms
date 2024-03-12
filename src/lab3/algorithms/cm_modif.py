@@ -9,32 +9,77 @@ from math import log2
 
 
 def main(matrix: list[list[int]]):
-    print("\nВхдная матрица:")
-    for row in matrix:
-        print("\t".join(map(str, row)))
+    while True:
+        print("\nВыберите тип модифицированного алгоритма:")
+        print("1. Матрица по убыванию")
+        print("2. Крит путь случайная матрица")
+        print("3. Крит путь матрица по убыванию")
 
-    tasks = [row[0] for row in matrix]
-    print("\nВектор T:", tasks)
+        request = input("Ввод: ")
+        match request:
+            case "1":
+                matrix.sort(key=lambda x: x[0], reverse=True)
 
-    # Первичное распределение
-    devices = [[] for _ in matrix[0]]
-    for i, task in enumerate(tasks):
-        devices[random.randint(0, len(devices) - 1)].append(task)
+                print("\nВхдная матрица:")
+                for row in matrix:
+                    print("\t".join(map(str, row)))
 
-    # Модификация метода Крона
-    for _ in range(int(log2(len(devices)))):
-        new_devices = []
-        for device in devices:
-            half = len(device) // 2
-            new_devices.append(device[:half])
-            new_devices.append(device[half:])
-        devices = new_devices
-    # devices = [
-    #     [4],
-    #     [5, 15, 5],
-    #     [10, 7],
-    #     [22]
-    # ]
+                tasks = [row[0] for row in matrix]
+                print("\nВектор T:", tasks)
+
+                # Первичное распределение
+                devices = [[] for _ in matrix[0]]
+                for i, task in enumerate(tasks):
+                    devices[random.randint(0, len(devices) - 1)].append(task)
+                break
+            case "2":
+                random.shuffle(matrix)
+                print("\nСлучайная матрица:")
+                for row in matrix:
+                    print("\t".join(map(str, row)))
+
+                tasks = [row[0] for row in matrix]
+                print("\nВектор T:", tasks)
+
+                devices = [[] for _ in range(len(matrix[0]))]
+
+                for time in tasks:
+                    min_load_processor = min(range(len(devices)), key=lambda index: sum(devices[index]))
+                    devices[min_load_processor].append(time)
+
+                for i, processor in enumerate(devices):
+                    print(f"Устройство {i + 1}: {processor}", "\t", sum(processor))
+                print(
+                    f"Максимальная нагрузка: "
+                    f"{max(sum(processor) for processor in devices)}"
+                )
+                break
+            case "3":
+                matrix.sort(key=lambda x: x[0], reverse=True)
+
+                print("\nОтсортированная матрица:")
+                for row in matrix:
+                    print("\t".join(map(str, row)))
+
+                tasks = [row[0] for row in matrix]
+                print("\nВектор T:", tasks)
+
+                devices = [[] for _ in range(len(matrix[0]))]
+
+                for time in tasks:
+                    min_load_processor = min(range(len(devices)), key=lambda index: sum(devices[index]))
+                    devices[min_load_processor].append(time)
+
+                for i, processor in enumerate(devices):
+                    print(f"Устройство {i + 1}: {processor}", "\t", sum(processor))
+                print(
+                    f"Максимальная нагрузка: "
+                    f"{max(sum(processor) for processor in devices)}"
+                )
+                break
+            case _:
+                print("Неверный ввод, повторите попытку")
+                continue
 
     k = 1
     while True:
@@ -70,7 +115,7 @@ def main(matrix: list[list[int]]):
             is_founded_2 = False
             for i, one_from_max in enumerate(devices[max_device[1]]):
                 for j, one_from_min in enumerate(devices[min_device[1]]):
-                    if one_from_max < one_from_min:
+                    if one_from_max <= one_from_min:
                         continue
 
                     if is_founded_2:
