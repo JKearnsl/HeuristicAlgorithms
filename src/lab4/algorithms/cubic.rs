@@ -1,6 +1,5 @@
 use std::io;
 use std::io::Write;
-use rand::prelude::SliceRandom;
 
 pub fn main(input_matrix: &Vec<Vec<i32>>, ) {
     let matrix = {

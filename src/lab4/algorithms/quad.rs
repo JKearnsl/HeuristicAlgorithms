@@ -1,7 +1,7 @@
 use std::io;
 use std::io::Write;
-use rand::seq::SliceRandom;
 
+use rand::seq::SliceRandom;
 
 pub fn main(input_matrix: &Vec<Vec<i32>>, ) {
     let matrix = {
@@ -14,7 +14,7 @@ pub fn main(input_matrix: &Vec<Vec<i32>>, ) {
             print!("Ваш выбор: ");
             io::stdout().flush().unwrap();
             let mut choice = String::new();
-            std::io::stdin().read_line(&mut choice).unwrap();
+            io::stdin().read_line(&mut choice).unwrap();
             let choice: u32 = match choice.trim().parse() {
                 Ok(num) => num,
                 Err(_) => {
@@ -24,19 +24,18 @@ pub fn main(input_matrix: &Vec<Vec<i32>>, ) {
             };
             match choice {
                 1 => {
-                    for row in temp_matrix.iter_mut() {
-                        row.shuffle(&mut rand::thread_rng());
-                    }
+                    let mut rng = rand::thread_rng();
+                    temp_matrix.shuffle(&mut rng);
                     break temp_matrix;
-                }
+                },
                 2 => {
-                    temp_matrix.sort();
+                    temp_matrix.sort_by_key(|row| row.iter().sum::<i32>());
                     break temp_matrix;
-                }
+                },
                 3 => {
-                    temp_matrix.sort_by(|a, b| b.cmp(a));
+                    temp_matrix.sort_by_key(|row| -row.iter().sum::<i32>());
                     break temp_matrix;
-                }
+                },
                 _ => {
                     println!("Неверный ввод. Попробуйте еще раз.");
                     continue;
@@ -50,7 +49,7 @@ pub fn main(input_matrix: &Vec<Vec<i32>>, ) {
         for cell in row.iter() {
             print!("{:4} ", cell);
         }
+        print!("\t| Сумма: {}", row.iter().sum::<i32>());
         println!();
     }
-
 }

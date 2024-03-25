@@ -60,14 +60,10 @@ fn main() {
 
     let matrix = {
         let mut rng = rand::thread_rng();
-        let mut column = Vec::new();
-        for _ in 0..tasks {
-            column.push(rng.gen_range(range.0..range.1));
-        }
         let mut temp_matrix = vec![vec![0; devices as usize]; tasks as usize];
-        for (i, row) in temp_matrix.iter_mut().enumerate() {
+        for row in temp_matrix.iter_mut() {
             for cell in row.iter_mut() {
-                *cell = column[i];
+                *cell = rng.gen_range(range.0..range.1);
             }
         }
         temp_matrix
