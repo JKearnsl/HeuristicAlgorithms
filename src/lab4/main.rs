@@ -1,8 +1,8 @@
-mod algorithms;
+pub mod algorithms;
 
 use std::io;
 use std::io::Write;
-use rand::{Rng};
+use rand::Rng;
 
 fn main() {
     let devices = {
@@ -40,7 +40,13 @@ fn main() {
             print!("Введите диапазон значений через запятую: ");
             io::stdout().flush().unwrap();
             let mut input = String::new();
-            io::stdin().read_line(&mut input).unwrap();
+            match io::stdin().read_line(&mut input) {
+                Ok(_) => (),
+                Err(_) => {
+                    println!("Некорректный ввод. Попробуйте еще раз.");
+                    continue;
+                }
+            }
 
             let trimmed_input = input.trim().replace(" ", "");
             let values: Vec<&str> = trimmed_input.split(',').collect();
@@ -90,12 +96,10 @@ fn main() {
             Ok(n) => {
                 match n {
                     1 => {
-                        let result = algorithms::quad::main(&matrix);
-                        println!("Результат: {:?}", result);
+                        algorithms::quad(&matrix)
                     }
                     2 => {
-                        let result = algorithms::cubic::main(&matrix);
-                        println!("Результат: {:?}", result);
+                        algorithms::cubic(&matrix)
                     }
                     3 => {
                         println!("Выход...");
@@ -106,7 +110,7 @@ fn main() {
                         continue;
                     }
                 }
-                break;
+                continue;
             }
             Err(_) => {
                 println!("Некорректный ввод. Попробуйте еще раз.");
