@@ -20,12 +20,6 @@ def main(matrix: list[list[int]]):
     for i, task in enumerate(tasks):
         devices[random.randint(0, len(devices) - 1)].append(task)
 
-    # devices = [
-    #     [4],
-    #     [5, 15, 5],
-    #     [10, 7],
-    #     [22]
-    # ]
 
     k = 1
     while True:
