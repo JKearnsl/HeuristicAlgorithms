@@ -1,0 +1,14 @@
+[package]
+name = "HeuristicAlgorithms"
+version = "0.1.0"
+edition = "2021"
+include = ["src/lab4"]
+
+[[bin]]
+name = "lab4"
+path = "src/lab4/main.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.9.0-alpha.1"
