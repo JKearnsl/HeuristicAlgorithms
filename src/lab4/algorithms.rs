@@ -30,7 +30,7 @@ fn logic(matrix: &Vec<Vec<i32>>, pow: u32) {
                 if sum_col != 0 {
                     print!("({}+{}){:3} ", sum_col, task, unicode_pow);
                 }else {
-                    print!("{} ", task);
+                    print!("{}{:3}", task, unicode_pow);
                 }
                 *task = (sum_col + *task).pow(pow);
             }
@@ -54,9 +54,12 @@ fn logic(matrix: &Vec<Vec<i32>>, pow: u32) {
     }
 
     println!("Результат:");
+    let mut results = vec![0; matrix[0].len()];
     for i in 0..matrix[0].len() {
-        print!("{} ", column_els(&buffer_matrix, i).iter().sum::<i32>());
+        results[i] = column_els(&buffer_matrix, i).iter().sum::<i32>();
+        print!("{} ", results[i]);
     }
+    print!("Max: {}", results.iter().max().unwrap());
     println!();
 }
 
