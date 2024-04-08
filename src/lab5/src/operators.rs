@@ -42,7 +42,7 @@ pub fn mutation(genotype: &Vec<[u8; 2]>) -> Vec<[u8; 2]> {
     let random_gen_index = rnd.gen_range(0..new_genotype.len());
     let random_bit = rnd.gen_range(0..7);
 
-    let mut mut_gen = genotype[random_gen_index];
+    let mut_gen = genotype[random_gen_index];
     let binary_str = format!("{:08b}", mut_gen[1]);
     let mut binary_str = binary_str.chars().collect::<Vec<char>>();
     binary_str[random_bit] = if binary_str[random_bit] == '0' { '1' } else { '0' };

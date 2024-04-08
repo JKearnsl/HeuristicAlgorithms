@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use rand::Rng;
 
 #[derive(Clone)]
 pub struct Phenotype {
