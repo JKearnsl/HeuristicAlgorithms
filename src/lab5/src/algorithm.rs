@@ -108,27 +108,31 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
                 let mut child2 = genotype2.clone();
 
                 if rnd.gen_range(0..100) < p_k {
+
+                    println!("\nВыполнился оператор кроссовера с вероятностью {}%", p_k);
+
                     let (new_genotype1, new_genotype2) = crossover(&genotype1.0, &genotype2.0);
                     child1.0 = new_genotype1;
                     child2.0 = new_genotype2;
 
-                    println!("Выполнился оператор кроссовера с вероятностью {}%", p_k);
-                    println!("\nОсобь{} Генотип: ", g1_index + 1);
+                    println!("Особь{} Генотип: ", g1_index + 1);
                     println!("{}", genes_to_string(&child1.0));
 
-                    println!("Особь{} Генотип: ", g2_index + 1);
+                    println!("\nОсобь{} Генотип: ", g2_index + 1);
                     println!("{}", genes_to_string(&child2.0));
 
                 }
                 if rnd.gen_range(0..100) < p_m {
+
+                    println!("\nВыполнился оператор мутации с вероятностью {}%", p_m);
+
                     child1.0 = mutation(&child1.0);
                     child2.0 = mutation(&child2.0);
 
-                    println!("Выполнился оператор мутации с вероятностью {}%", p_m);
-                    println!("\nОсобь{} Генотип: ", g1_index + 1);
+                    println!("Особь{} Генотип: ", g1_index + 1);
                     println!("{}", genes_to_string(&child1.0));
 
-                    println!("Особь{} Генотип: ", g2_index + 1);
+                    println!("\nОсобь{} Генотип: ", g2_index + 1);
                     println!("{}", genes_to_string(&child2.0));
                 }
                 child1.1 = Phenotype::new(&byte_slices, &child1.0);
@@ -140,6 +144,11 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
                     child2
                 }
             };
+            println!("\nЛучший ребенок: ");
+            println!("Генотип: ");
+            println!("{}", genes_to_string(&great_child.0));
+            println!("Определитель фенотипа: {}", great_child.1.max_sum);
+
             new_generation.push(great_child);
         }
 
