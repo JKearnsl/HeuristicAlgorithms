@@ -85,14 +85,16 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
         println!("\n------------- Формирование нового поколения №{} -------------", gen_counter + 1);
 
         for (g1_index, genotype1) in last_generation.iter().enumerate() {
+
+            let (genotype2, g2_index) = {
+                let mut rnd_genotype2 = rnd.gen_range(0..last_generation.len());
+                while rnd_genotype2 == g1_index {
+                    rnd_genotype2 = rnd.gen_range(0..last_generation.len());
+                }
+                (&last_generation[rnd_genotype2], rnd_genotype2)
+            };
+
             let great_child= {
-                let (genotype2, g2_index) = {
-                    let mut rnd_genotype2 = rnd.gen_range(0..last_generation.len());
-                    while rnd_genotype2 == g1_index {
-                        rnd_genotype2 = rnd.gen_range(0..last_generation.len());
-                    }
-                    (&last_generation[rnd_genotype2], rnd_genotype2)
-                };
 
                 println!("\n> - - - - - - -Скрещивание особей {} и {}", g1_index + 1, g2_index + 1);
                 println!("\nОсобь{} Генотип: ", g1_index + 1);
@@ -114,11 +116,13 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
                     let (new_genotype1, new_genotype2) = crossover(&genotype1.0, &genotype2.0);
                     child1.0 = new_genotype1;
                     child2.0 = new_genotype2;
+                    child1.1 = Phenotype::new(&byte_slices, &child1.0);
+                    child2.1 = Phenotype::new(&byte_slices, &child2.0);
 
-                    println!("Особь{} Генотип: ", g1_index + 1);
+                    println!("Особь [1] Генотип: ");
                     println!("{}", genes_to_string(&child1.0));
 
-                    println!("\nОсобь{} Генотип: ", g2_index + 1);
+                    println!("\nОсобь [2] Генотип: ");
                     println!("{}", genes_to_string(&child2.0));
 
                 }
@@ -128,15 +132,19 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
 
                     child1.0 = mutation(&child1.0);
                     child2.0 = mutation(&child2.0);
+                    child1.1 = Phenotype::new(&byte_slices, &child1.0);
+                    child2.1 = Phenotype::new(&byte_slices, &child2.0);
 
-                    println!("Особь{} Генотип: ", g1_index + 1);
+                    println!("Особь [1] Генотип: ");
                     println!("{}", genes_to_string(&child1.0));
+                    println!("\nФенотип: ");
+                    child1.1.print();
 
-                    println!("\nОсобь{} Генотип: ", g2_index + 1);
+                    println!("\nОсобь [2] Генотип: ");
                     println!("{}", genes_to_string(&child2.0));
+                    println!("\nФенотип: ");
+                    child2.1.print();
                 }
-                child1.1 = Phenotype::new(&byte_slices, &child1.0);
-                child2.1 = Phenotype::new(&byte_slices, &child2.0);
 
                 if child1.1.max_sum < child2.1.max_sum {
                     child1
@@ -147,8 +155,12 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
             println!("\nЛучший ребенок: ");
             println!("Генотип: ");
             println!("{}", genes_to_string(&great_child.0));
+            println!("\nФенотип: ");
+            great_child.1.print();
             println!("Определитель фенотипа: {}", great_child.1.max_sum);
-
+            if great_child.1.max_sum < genotype1.1.max_sum && great_child.1.max_sum < genotype2.1.max_sum {
+                println!("Ребенок лучше обоих родителей: {} < {} и {}", great_child.1.max_sum, genotype1.1.max_sum, genotype2.1.max_sum);
+            }
             new_generation.push(great_child);
         }
 
