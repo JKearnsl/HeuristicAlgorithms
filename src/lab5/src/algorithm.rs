@@ -45,6 +45,12 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
 
             byte_slice.push((segment_start, segment_end));
             println!("Сегмент: [{}] {} - {}", value, segment_start, segment_end);
+
+            // bugfix
+            if index == segments - 1 {
+                break;
+            }
+
         }
         byte_slice
     };
