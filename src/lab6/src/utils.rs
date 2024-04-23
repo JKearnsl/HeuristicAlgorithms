@@ -5,7 +5,7 @@ pub struct Phenotype {
     pub matrix: Vec<Vec<u8>>,
     pub max_sum : u32,
     max_sum_index: usize,
-    byte_slices: Vec<(u8, u8)>,
+    pub byte_slices: Vec<(u8, u8)>,
 }
 
 
