@@ -58,11 +58,20 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
     println!("\nНачальное поколение: ");
     let start_generation = {
         let mut generation = vec![];
+
+        let mut generator_column_of_matrix = {
+            let mut columns = vec![];
+            for i in 0..matrix[0].len() {
+                columns.push(vec_column(matrix, i));
+            }
+            columns.into_iter().cycle()
+        };
+
         for i in 0..z {
             let mut genotype: Vec<[u8; 2]> = vec![];
 
             println!("\nОсобь{} Генотип: ", i + 1);
-            let column = vec_column(matrix, 0);
+            let column = generator_column_of_matrix.next().unwrap();
             for el in column.iter() {
                 genotype.push([*el as u8, rnd.gen_range(0..255)]);
             }
@@ -125,9 +134,11 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
 
                     println!("Особь [1] Генотип: ");
                     println!("{}", genes_to_string(&child1.0));
+                    child1.1.print();
 
                     println!("\nОсобь [2] Генотип: ");
                     println!("{}", genes_to_string(&child2.0));
+                    child2.1.print()
 
                 }
                 if rnd.gen_range(0..100) < p_m {
@@ -186,9 +197,24 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
             }
         }
 
+        print!("Сформированный вектор лучших особей + родители:\n[");
         new_generation.extend(last_generation.iter().cloned());
+        for (_, phenotype) in new_generation.iter() {
+            print!("{} ", phenotype.max_sum)
+        }
+        print!("]\n");
         new_generation.sort_by(|a, b| a.1.max_sum.cmp(&b.1.max_sum));
+        print!("Отсортированный список по наименьшим макс значениям:\n[");
+        for (_, phenotype) in new_generation.iter() {
+            print!("{} ", phenotype.max_sum)
+        }
+        print!("]\n");
         new_generation.truncate(z as usize);
+        print!("Сформированное новое поколение:\n[");
+        for (_, phenotype) in new_generation.iter() {
+            print!("{} ", phenotype.max_sum)
+        }
+        println!("]");
 
         generations.push(new_generation);
         gen_counter += 1;
