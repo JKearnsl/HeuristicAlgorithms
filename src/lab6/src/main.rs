@@ -177,17 +177,10 @@ fn main() {
     };
     let matrix = {
         let mut rng = rand::thread_rng();
-        let column = {
-            let mut column = vec![0; tasks as usize];
-            for cell in column.iter_mut() {
-                *cell = rng.gen_range(range.0..range.1);
-            }
-            column
-        };
         let mut temp_matrix = vec![vec![0; devices as usize]; tasks as usize];
         for (i, row) in temp_matrix.iter_mut().enumerate() {
             for cell in row.iter_mut() {
-                *cell = column[i];
+                *cell = rng.gen_range(range.0..range.1)
             }
         }
         temp_matrix
