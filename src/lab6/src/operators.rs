@@ -1,3 +1,4 @@
+use std::fmt::format;
 use rand::Rng;
 
 
@@ -34,6 +35,24 @@ pub fn crossover(genotype1: &Vec<[u8; 2]>, genotype2: &Vec<[u8; 2]>) -> (Vec<[u8
     (result1, result2)
 }
 
+
+fn highlight_bits(number: u32, bits_to_highlight: &[usize]) -> String {
+    let binary_str = format!("{:08b}", number);
+    let highlighted_str = binary_str
+        .chars()
+        .enumerate()
+        .map(|(index, bit)| {
+            if bits_to_highlight.contains(&index) {
+                format!("\x1b[1;31m{}\x1b[0m", bit) // выделяем бит красным цветом
+            } else {
+                bit.to_string()
+            }
+        })
+        .collect::<String>();
+    highlighted_str
+}
+
+
 /**
     Функция, выполняющая операцию мутации генотипа.
     Он меняет местами два случайных бита в случайном гене.
@@ -42,7 +61,8 @@ pub fn crossover(genotype1: &Vec<[u8; 2]>, genotype2: &Vec<[u8; 2]>) -> (Vec<[u8
     # Returns
     Генотип после операции мутации.
  */
-pub fn mutation(genotype: &Vec<[u8; 2]>) -> Vec<[u8; 2]> {
+pub fn mutation(genotype: &Vec<[u8; 2]>) -> (Vec<[u8; 2]>, Vec<String>) {
+    let mut log = vec![];
     let mut rnd = rand::thread_rng();
     let mut new_genotype: Vec<[u8; 2]> = genotype.clone();
     let random_gen_index = rnd.gen_range(0..new_genotype.len());
@@ -54,7 +74,7 @@ pub fn mutation(genotype: &Vec<[u8; 2]>) -> Vec<[u8; 2]> {
         }
     };
 
-    let mut_gen = genotype[random_gen_index];
+    let mut_gen = genotype[random_gen_index].clone();
     let binary_str = format!("{:08b}", mut_gen[1]);
     let mut binary_str = binary_str.chars().collect::<Vec<char>>();
 
@@ -65,7 +85,17 @@ pub fn mutation(genotype: &Vec<[u8; 2]>) -> Vec<[u8; 2]> {
 
     let new_byte = u8::from_str_radix(&binary_str.iter().collect::<String>(), 2).unwrap();
     new_genotype[random_gen_index][1] = new_byte;
-    new_genotype
+
+
+    log.push(format!(
+        "[{}] -> {} -> {} -> [{}]",
+        mut_gen[1],
+        highlight_bits(mut_gen[1] as u32, &[random_bit_1, random_bit_2]),
+        highlight_bits(new_byte as u32, &[random_bit_2, random_bit_1]),
+        new_byte
+    ));
+
+    (new_genotype, log)
 }
 
 
