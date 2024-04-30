@@ -95,7 +95,11 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
     loop {
         let last_generation = generations.last().unwrap();
         let mut new_generation: Vec<(Vec<[u8; 2]>, Phenotype)> = vec![];
-        println!("\n------------- Формирование нового поколения №{} -------------", gen_counter + 1);
+        println!(
+            "\n------------- {} №{} -------------",
+            format!("\x1b[1;33m{}\x1b[0m", "Формирование нового поколения"),
+            gen_counter + 1
+        );
 
         for (g1_index, genotype1) in last_generation.iter().enumerate() {
 
@@ -109,7 +113,7 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
 
             let great_child= {
 
-                println!("\n> - - - - - - -Скрещивание особей {} и {}", g1_index + 1, g2_index + 1);
+                println!("\n> - - - - - - - Скрещивание особей {} и {} - - - - - - - <", g1_index + 1, g2_index + 1);
                 println!("\nОсобь{} Генотип: ", g1_index + 1);
                 println!("{}", genes_to_string(&genotype1.0));
                 println!("Определитель фенотипа: {}", genotype1.1.max_sum);
@@ -145,18 +149,23 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
 
                     println!("\nВыполнился оператор мутации с вероятностью {}%", p_m);
 
-                    child1.0 = mutation(&child1.0);
-                    child2.0 = mutation(&child2.0);
+                    let mutation1 = mutation(&child1.0);
+                    let mutation2 = mutation(&child2.0);
+
+                    child1.0 = mutation1.0;
+                    child2.0 = mutation2.0;
                     child1.1 = Phenotype::new(&byte_slices, &child1.0);
                     child2.1 = Phenotype::new(&byte_slices, &child2.0);
 
                     println!("Особь [1] Генотип: ");
                     println!("{}", genes_to_string(&child1.0));
+                    print!("\n{}\n", mutation1.1.iter().map(|x| format!("{} ", x)).collect::<String>());
                     println!("\nФенотип: ");
                     child1.1.print();
 
                     println!("\nОсобь [2] Генотип: ");
                     println!("{}", genes_to_string(&child2.0));
+                    print!("\n{}\n", mutation2.1.iter().map(|x| format!("{} ", x)).collect::<String>());
                     println!("\nФенотип: ");
                     child2.1.print();
                 }
