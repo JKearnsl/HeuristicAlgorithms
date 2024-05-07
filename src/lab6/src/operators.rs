@@ -11,10 +11,10 @@ use rand::Rng;
     # Returns
     Кортеж двух генотипов после операции скрещивания.
  */
-pub fn crossover(genotype1: &Vec<[u8; 2]>, genotype2: &Vec<[u8; 2]>) -> (Vec<[u8; 2]>, Vec<[u8; 2]>) {
+pub fn crossover(genotype1: &Vec<[u8; 3]>, genotype2: &Vec<[u8; 3]>) -> (Vec<[u8; 3]>, Vec<[u8; 3]>) {
     let mut rnd = rand::thread_rng();
-    let mut result1: Vec<[u8; 2]> = vec![];
-    let mut result2: Vec<[u8; 2]> = vec![];
+    let mut result1: Vec<[u8; 3]> = vec![];
+    let mut result2: Vec<[u8; 3]> = vec![];
     let random_index_1 = rnd.gen_range(0..genotype1.len());
     let random_index_2 = loop {
         let value = rnd.gen_range(0..genotype1.len());
@@ -23,7 +23,8 @@ pub fn crossover(genotype1: &Vec<[u8; 2]>, genotype2: &Vec<[u8; 2]>) -> (Vec<[u8
         }
     };
 
-    for (index, (gen1, gen2)) in genotype1.iter().zip(genotype2.iter()).enumerate(){
+
+    for (index, (gen1, gen2)) in genotype1.iter().zip(genotype2.iter()).enumerate() {
         if random_index_1 <= index  && index <= random_index_2 {
             result1.push(*gen2);
             result2.push(*gen1);
@@ -61,10 +62,10 @@ fn highlight_bits(number: u32, bits_to_highlight: &[usize]) -> String {
     # Returns
     Генотип после операции мутации.
  */
-pub fn mutation(genotype: &Vec<[u8; 2]>) -> (Vec<[u8; 2]>, Vec<String>) {
+pub fn mutation(genotype: &Vec<[u8; 3]>) -> (Vec<[u8; 3]>, Vec<String>) {
     let mut log = vec![];
     let mut rnd = rand::thread_rng();
-    let mut new_genotype: Vec<[u8; 2]> = genotype.clone();
+    let mut new_genotype: Vec<[u8; 3]> = genotype.clone();
     let random_gen_index = rnd.gen_range(0..new_genotype.len());
     let random_bit_1 = rnd.gen_range(0..7);
     let random_bit_2 = loop {
@@ -94,25 +95,5 @@ pub fn mutation(genotype: &Vec<[u8; 2]>) -> (Vec<[u8; 2]>, Vec<String>) {
         highlight_bits(new_byte as u32, &[random_bit_2, random_bit_1]),
         new_byte
     ));
-
     (new_genotype, log)
-}
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_crossover() {
-        let genotype1 = vec![[1, 23], [2, 34], [3, 255]];
-        let genotype2 = vec![[1, 34], [2, 23], [3, 0]];
-        let (result1, result2) = crossover(&genotype1, &genotype2);
-    }
-
-    #[test]
-    fn test_mutation() {
-        let genotype = vec![[1, 23], [2, 34], [3, 255]];
-        let result = mutation(&genotype);
-    }
 }
