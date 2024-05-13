@@ -1,180 +1,193 @@
+use std::io::Write;
 use rand::Rng;
 use rand::seq::SliceRandom;
-use crate::utils::{alphabet, crossover, mutation};
+use crate::utils::{alphabet, crossover, mutation, save_graph_with_path};
 
 
 fn calc_phenotype(matrix: &Vec<Vec<u32>>, genotype: &Vec<char>) -> (u32, String) {
     let alphas_vec = alphabet().collect::<Vec<char>>()[..matrix.len()].to_vec();
+    let alphas_hash: std::collections::HashMap<char, usize> = alphas_vec.iter().enumerate().map(|(i, &x)| (x, i)).collect();
     let pairs = genotype.iter().zip(genotype.iter().skip(1));
     let mut sum = 0;
     let mut log_str = String::new();
     for (a, b) in pairs {
-        let val = matrix[alphas_vec.iter().position(|&x| x == *a).unwrap()][alphas_vec.iter().position(|&x| x == *b).unwrap()];
+        let val = matrix[alphas_hash[a]][alphas_hash[b]];
         sum += val;
         log_str.push_str(&format!("{:4}", val));
     }
-    log_str.push_str(&format!(" = {}", sum));
+    log_str.push_str(&format!(" = {}\n", sum));
     (sum, log_str)
 }
 
-pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_vertice: u32) {
-    
+pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_vertice: u32) -> u32 {
+    let p_m = 30;
+    let mut log_file = std::fs::File::create("genetic.log").unwrap();
     let mut rnd = rand::thread_rng();
-    let mut generations: Vec<Vec<Vec<char>>> = vec![];
+    let mut generations: Vec<Vec<(Vec<char>, u32)>> = vec![];
 
-    let alphas_vec = alphabet().collect::<Vec<char>>()[..matrix.len() - 1].to_vec();
+    let alphas_vec = alphabet().collect::<Vec<char>>()[..matrix.len()].to_vec();
+    let alphas_hash: std::collections::HashMap<char, usize> = alphas_vec.iter().enumerate().map(|(i, &x)| (x, i)).collect();
     let available_genes: Vec<char> = alphas_vec.clone().iter().filter(
         |&x| *x != alphas_vec.get(start_vertice as usize).unwrap().clone()
     ).map(|&x| x).collect();
     let start_alpha = alphas_vec.get(start_vertice as usize).unwrap();
     
+    let mut best_sum: u32 = std::u32::MAX;
 
-    println!("\nНачальное поколение: ");
+    log_file.write("\nНачальное поколение: \n".to_string().as_ref()).expect("Ошибка записи");
     let start_generation = {
         let mut generation = vec![];
-        
+
         for i in 0..z {
             let mut genotype: Vec<char> = vec![];
-            
-            println!("\nОсобь [{}] Генотип: ", i + 1);
+
+            log_file.write(format!("\nОсобь [{}] Генотип: \n", i + 1).as_ref()).expect("Ошибка записи");
             let mut genes = available_genes.clone();
             genes.shuffle(&mut rnd);
-            
-            print!("{:4}", start_alpha);
+
+            log_file.write(format!("{:4}", start_alpha).as_ref()).expect("Ошибка записи");
             genotype.push(start_alpha.clone());
             for el in genes.iter() {
-                print!("{:4}", el);
+                log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
                 genotype.push(el.clone());
             }
-            println!("{:4}", start_alpha);
+            log_file.write(format!("{:4}\n", start_alpha).as_ref()).expect("Ошибка записи");
             genotype.push(start_alpha.clone());
-            
-            let (_, log_str) = calc_phenotype(matrix, &genotype);
-            println!("{}", log_str);
-            
-            generation.push(genotype);
+
+            let (max_sum, log_str) = calc_phenotype(matrix, &genotype);
+            log_file.write(format!("{}\n", log_str).as_ref()).expect("Ошибка записи");
+
+            generation.push((genotype, max_sum));
         }
         generation
     };
     generations.push(start_generation);
-    
+
     let start_time = std::time::Instant::now();
     let mut gen_counter = 0;
     loop {
         let last_generation = generations.last().unwrap();
-        let mut new_generation: Vec<Vec<char>> = vec![];
-        println!(
-            "\n------------- {} №{} -------------",
-            format!("\x1b[1;33m{}\x1b[0m", "Формирование нового поколения"),
+        let mut new_generation: Vec<(Vec<char>, u32)> = vec![];
+        log_file.write(format!(
+            "\n------------- {} №{} -------------\n",
+            "Формирование нового поколения",
             gen_counter + 1
-        );
+        ).as_ref()).expect("Ошибка записи");
 
-        for (i1_index, genotype1) in last_generation.iter().enumerate() {
+        for (i1_index, individual1) in last_generation.iter().enumerate() {
 
-            let (genotype2, i2_index) = {
-                let mut rnd_genotype2 = rnd.gen_range(0..last_generation.len());
-                while rnd_genotype2 == i1_index {
-                    rnd_genotype2 = rnd.gen_range(0..last_generation.len());
+            let (individual2, i2_index) = {
+                let mut rnd_individual2 = rnd.gen_range(0..last_generation.len());
+                while rnd_individual2 == i1_index {
+                    rnd_individual2 = rnd.gen_range(0..last_generation.len());
                 }
-                (&last_generation[rnd_genotype2], rnd_genotype2)
+                (&last_generation[rnd_individual2], rnd_individual2)
             };
 
             let great_child= {
 
-                println!("\n> - - - - - - - Скрещивание особей {} и {} - - - - - - - <", i1_index + 1, i2_index + 1);
-                println!("\nОсобь [{}] Генотип: ", i1_index + 1);
-                
-                for el in genotype1.iter() {
-                    print!("{:4}", el);
+                log_file.write(format!(
+                    "\n> - - - - - - - Скрещивание особей {} и {} - - - - - - - <\n", 
+                    i1_index + 1, 
+                    i2_index + 1
+                ).as_ref()).expect("Ошибка записи");
+                log_file.write(format!("\nОсобь [{}] Генотип: \n", i1_index + 1).as_ref()).expect("Ошибка записи");
+
+                for el in individual1.0.iter() {
+                    log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
                 }
-                println!();
+                log_file.write("\n".to_string().as_ref()).expect("Ошибка записи");
+                log_file.write(format!("Фенотип: {}\n", individual1.1).as_ref()).expect("Ошибка записи");
 
-                let (sum1, log_str1) = calc_phenotype(matrix, &genotype1);
-                println!("{}", log_str1);
+                log_file.write(format!("\nОсобь [{}] Генотип: \n", i2_index + 1).as_ref()).expect("Ошибка записи");
 
-                println!("\nОсобь [{}] Генотип: ", i2_index + 1);
-                
-                for el in genotype2.iter() {
-                    print!("{:4}", el);
+                for el in individual2.0.iter() {
+                    log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
                 }
-                println!();
-                
-                let (sum2, log_str2) = calc_phenotype(matrix, &genotype2);
-                println!("{}", log_str2);
+                log_file.write("\n".to_string().as_ref()).expect("Ошибка записи");
+                log_file.write(format!("Фенотип: {}\n", individual2.1).as_ref()).expect("Ошибка записи");
 
-                let mut child1 = genotype1.clone();
-                let mut child2 = genotype2.clone();
+                let mut child1 = individual1.clone();
+                let mut child2 = individual2.clone();
 
                 if rnd.gen_range(0..100) < p_k {
 
-                    println!("\nВыполнился оператор кроссовера с вероятностью {}%", p_k);
+                    log_file.write(format!("\nВыполнился оператор кроссовера с вероятностью {}%\n", p_k).as_ref()).expect("Ошибка записи");
 
-                    let (child1, child2) = crossover(&genotype1, &genotype2);
+                    let (geno1, geno2) = crossover(&child1.0, &child2.0);
 
-                    println!("Особь [#1] Генотип: ");
-                    for el in child1.iter() {
-                        print!("{:4}", el);
+                    log_file.write(format!("Особь [#1] Генотип: \n").as_ref()).expect("Ошибка записи");
+                    for el in geno1.iter() {
+                        log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
                     }
-                    println!();
-                    
-                    let (sum1, log_str1) = calc_phenotype(matrix, &child1);
-                    println!("{}", log_str1);
-                    
-                    println!("\nОсобь [#2] Генотип: ");
-                    for el in child2.iter() {
-                        print!("{:4}", el);
+                    log_file.write("\n".to_string().as_ref()).expect("Ошибка записи");
+
+                    let (sum1, log_str1) = calc_phenotype(matrix, &geno1);
+                    log_file.write(format!("{}\n", log_str1).as_ref()).expect("Ошибка записи");
+
+                    log_file.write(format!("\nОсобь [#2] Генотип: \n").as_ref()).expect("Ошибка записи");
+                    for el in geno2.iter() {
+                        log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
                     }
-                    println!();
-                    let (sum2, log_str2) = calc_phenotype(matrix, &child2);
-                    println!("{}", log_str2);
+                    log_file.write("\n".to_string().as_ref()).expect("Ошибка записи");
+                    let (sum2, log_str2) = calc_phenotype(matrix, &geno2);
+                    log_file.write(format!("{}\n", log_str2).as_ref()).expect("Ошибка записи");
+                    
+                    child1 = (geno1, sum1);
+                    child2 = (geno2, sum2);
+                    
                 }
                 if rnd.gen_range(0..100) < p_m {
 
-                    println!("\nВыполнился оператор мутации с вероятностью {}%", p_m);
+                    log_file.write(format!("\nВыполнился оператор мутации с вероятностью {}%\n", p_m).as_ref()).expect("Ошибка записи");
 
-                    let log_str1 = mutation(&mut child1);
-                    let log_str2 = mutation(&mut child2);
-                    
-                    println!("Особь [1] Генотип: ");
-                    for el in child1.iter() {
-                        print!("{:4}", el);
+                    let (geno1, log_str1) = mutation(&child1.0);
+                    let (geno2, log_str2) = mutation(&child2.0);
+
+                    log_file.write(format!("Особь [1] Генотип: \n").as_ref()).expect("Ошибка записи");
+                    for el in geno1.iter() {
+                        log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
                     }
-                    println!();
-                    println!("{}", log_str1);
-                    
-                    let (sum1, log_str1) = calc_phenotype(matrix, &child1);
-                    println!("{}", log_str1);
-                    
-                    println!("\nОсобь [2] Генотип: ");
-                    for el in child2.iter() {
-                        print!("{:4}", el);
+                    log_file.write("\n".to_string().as_ref()).expect("Ошибка записи");
+                    log_file.write(format!("{}\n", log_str1).as_ref()).expect("Ошибка записи");
+
+                    let (sum1, log_str1) = calc_phenotype(matrix, &geno1);
+                    log_file.write(format!("{}\n", log_str1).as_ref()).expect("Ошибка записи");
+
+                    log_file.write(format!("\nОсобь [2] Генотип: \n").as_ref()).expect("Ошибка записи");
+                    for el in geno2.iter() {
+                        log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
                     }
-                    println!();
-                    println!("{}", log_str2);
-                    let (sum2, log_str2) = calc_phenotype(matrix, &child2);
-                    println!("{}", log_str2);
+                    log_file.write("\n".to_string().as_ref()).expect("Ошибка записи");
+                    log_file.write(format!("{}\n", log_str2).as_ref()).expect("Ошибка записи");
+                    let (sum2, log_str2) = calc_phenotype(matrix, &geno2);
+                    log_file.write(format!("{}\n", log_str2).as_ref()).expect("Ошибка записи");
+                    
+                    child1 = (geno1, sum1);
+                    child2 = (geno2, sum2);
                     
                 }
 
-                if sum1 < sum2 {
+                if child1.1 < child2.1 {
                     child1
                 } else {
                     child2
                 }
             };
-            println!("\nЛучший ребенок: ");
-            let (great_child_sum, phenotype) = calc_phenotype(matrix, &great_child);
-            for el in great_child.iter() {
-                print!("{:4}", el);
+            log_file.write(format!("\nЛучший ребенок: \n").as_ref()).expect("Ошибка записи");
+            for el in great_child.0.iter() {
+                log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
             }
-            println!();
-            println!("{}", phenotype);
+            log_file.write("\n".to_string().as_ref()).expect("Ошибка записи");
+            log_file.write(format!("Фенотип: {}\n", great_child.1).as_ref()).expect("Ошибка записи");
             
-            let (ind1_sum, _) = calc_phenotype(matrix, &genotype1);
-            let (ind2_sum, _) = calc_phenotype(matrix, &genotype2);
-            
-            if great_child_sum < ind1_sum && great_child_sum < ind2_sum {
-                println!("Ребенок лучше обоих родителей: {} < {} и {}", great_child_sum, ind1_sum, ind2_sum);
+            if great_child.1 < individual1.1 && great_child.1 < individual2.1 {
+                log_file.write(format!(
+                    "Ребенок лучше обоих родителей: {} < {} и {}\n", 
+                    great_child.1, 
+                    individual1.1, 
+                    individual2.1
+                ).as_ref()).expect("Ошибка записи");
             }
             new_generation.push(great_child);
         }
@@ -183,39 +196,51 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_ve
             let mut last_greet: Vec<u32> = vec![];
             for index in (generations.len() - k as usize)..generations.len() {
                 let last_gen = &generations[index];
-                let min_max_sum = last_gen.iter().map(|el| 
-                    calc_phenotype(matrix, &el).0
-                ).min().unwrap();
+                let min_max_sum = last_gen.iter().min_by_key(|el| el.1).unwrap().1;
                 last_greet.push(min_max_sum);
             }
-            println!(
-                "Последние {} поколений имеют лучший определитель фенотипа {:?} соответственно",
+            log_file.write(format!(
+                "Последние {} поколений имеют лучший определитель фенотипа {:?} соответственно\n",
                 k,
                 last_greet
-            );
+            ).as_ref()).expect("Ошибка записи");
             if last_greet.iter().all(|&x| x == last_greet[0]) {
-                println!("Остановка алгоритма: последние {} поколений имеют одинаковый определитель фенотипа лучшей особи", k);
-                
+                log_file.write(format!(
+                    "Остановка алгоритма: последние {} поколений имеют одинаковый определитель фенотипа лучшей особи\n",
+                    k
+                ).as_ref()).expect("Ошибка записи");
+
                 let last_gen = generations.last().unwrap();
-                let best_genotype = last_gen.iter().min_by_key(|el| calc_phenotype(matrix, &el).0).unwrap();
+                let best_genotype = last_gen.iter().min_by_key(|el| el.1).unwrap().0.clone();
                 let (best_sum, best_phenotype) = calc_phenotype(matrix, &best_genotype);
-                println!("\nЛучшая особь: ");
+                log_file.write(format!("\nЛучшая особь: \n").as_ref()).expect("Ошибка записи");
                 for el in best_genotype.iter() {
-                    print!("{:4}", el);
+                    log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
+                    log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
                 }
-                println!();
-                println!("{}", best_phenotype);
-                
+                log_file.write("\n".to_string().as_ref()).expect("Ошибка записи");
+                log_file.write(format!("{}\n", best_phenotype).as_ref()).expect("Ошибка записи");
+
                 break;
             }
         }
-        
+
         generations.push(new_generation);
         gen_counter += 1;
     }
     let delta_time = start_time.elapsed().as_millis();
+    
+    log_file.write(format!("\n\nВремя выполнения: {:?} мс", delta_time).as_ref()).expect("Ошибка записи");
+    log_file.write(format!("Количество поколений: {}\n", gen_counter + 1).as_ref()).expect("Ошибка записи");
 
-    println!("\nВремя выполнения: {:?} мс", delta_time);
-    print!("Количество поколений: {}\n", gen_counter + 1);
+    save_graph_with_path(
+        matrix.clone(), 
+        generations.last().unwrap().iter().min_by_key(|el| el.1).unwrap().0.clone().iter().map(
+            |&x| alphas_hash[&x]
+        ).collect(), 
+        "genetic_genetic".to_string()
+    );
+    
+    best_sum
 }
 

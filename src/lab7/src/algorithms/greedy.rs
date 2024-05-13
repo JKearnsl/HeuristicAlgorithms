@@ -1,6 +1,7 @@
-use crate::utils::alphabet;
+use std::io::Write;
+use crate::utils::{alphabet, save_graph_with_path};
 
-pub fn main(matrix: &Vec<Vec<u32>>, start_vertice: u32) {
+pub fn main(matrix: &Vec<Vec<u32>>, start_vertice: u32) -> u32 {
     let alphas_vec = alphabet().collect::<Vec<char>>()[..matrix.len()].to_vec();
     let mut visited = vec![false; matrix.len()];
     let mut path = vec![start_vertice as usize];
@@ -28,9 +29,15 @@ pub fn main(matrix: &Vec<Vec<u32>>, start_vertice: u32) {
     path.push(start_vertice as usize);
     total_distance += matrix[current_vertice][start_vertice as usize];
 
-    println!("Генотип: ");
+    save_graph_with_path(matrix.clone(), path.clone(), "greedy".to_string());
+
+    let mut log_file = std::fs::File::create("greedy.log").unwrap();
+
+    log_file.write(format!("Генотип: \n").as_ref()).expect("Ошибка записи в файл");
     for el in path.iter() {
-        print!("{:4}", alphas_vec[*el]);
+        log_file.write(format!("{:4}", alphas_vec[*el]).as_ref()).expect("Ошибка записи в файл");
     }
-    println!("Сумма: {}", total_distance);
+    log_file.write(format!("Сумма: {}", total_distance).as_ref()).expect("Ошибка записи в файл");
+    
+    total_distance
 }

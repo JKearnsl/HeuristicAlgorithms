@@ -1,6 +1,5 @@
 use std::io;
 use std::io::Write;
-use petgraph::Graph;
 
 use rand::Rng;
 
@@ -8,30 +7,6 @@ mod utils;
 mod algorithms;
 
 
-fn save_start_graph(matrix: Vec<Vec<u32>>) {
-    let mut graph: Graph<String, u32, petgraph::Undirected> = Graph::new_undirected();
-
-    let mut alphas = utils::alphabet();
-    for i in 0..matrix.len() {
-        graph.add_node(format!("{}", alphas.next().unwrap()));
-    }
-    for i in 0..matrix.len() {
-        for j in (i + 1)..matrix.len() {
-            graph.add_edge(
-                petgraph::graph::NodeIndex::new(i),
-                petgraph::graph::NodeIndex::new(j),
-                matrix[i][j],
-            );
-        }
-    }
-    
-    let dot = petgraph::dot::Dot::new(&graph);
-    let dot_str = format!("{:?}", dot);
-    
-    let mut file = std::fs::File::create("start_graph.dot").unwrap();
-    file.write_all(dot_str.as_bytes()).unwrap();
-    
-}
 
 fn main() {
 
@@ -252,7 +227,7 @@ fn main() {
         println!();
     }
 
-    save_start_graph(matrix.clone());
+    utils::save_start_graph(matrix.clone());
     println!("Граф сохранен в файл start_graph.dot");
     loop {
         println!("\nВыберите тип алгоритма: ");
@@ -267,10 +242,16 @@ fn main() {
             Ok(n) => {
                 match n {
                     1 => {
-                        algorithms::genetic::main(&matrix, k, z, p_k, p_m, start_vertice)
+                        let greedy_result = algorithms::greedy::main(&matrix, start_vertice);
+                        for _ in 0..3 {
+                            let result = algorithms::genetic::main(&matrix, k, z, p_k, p_m, start_vertice);
+                            if result < greedy_result {
+                                break;
+                            }
+                        }
                     }
                     2 => {
-                        algorithms::greedy::main(&matrix, start_vertice)
+                        algorithms::greedy::main(&matrix, start_vertice);
                     }
                     3 => {
                         println!("Выход...");
