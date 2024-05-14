@@ -156,7 +156,7 @@ fn main() {
             }
         }
     };
-    let p_m = {
+    let mut p_m = {
         loop {
             print!("Введите вероятность мутации Pm: ");
             io::stdout().flush().unwrap();
@@ -242,8 +242,11 @@ fn main() {
             Ok(n) => {
                 match n {
                     1 => {
+                        // if p_m > 30 && k >= 50  {
+                        //     p_m = 80;
+                        // }
                         let greedy_result = algorithms::greedy::main(&matrix, start_vertice);
-                        for _ in 0..3 {
+                        for _ in 0..10 {
                             let result = algorithms::genetic::main(&matrix, k, z, p_k, p_m, start_vertice);
                             if result < greedy_result {
                                 break;
