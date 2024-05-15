@@ -166,12 +166,21 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_ve
                     child2 = (geno2, sum2);
                     
                 }
-
-                if child1.1 < child2.1 {
-                    child1
-                } else {
-                    child2
+                
+                let local_best_child = {
+                    if child1.1 < child2.1 {
+                        child1
+                    } else {
+                        child2
+                    }
+                };
+                
+                if individual1.1 < local_best_child.1 {
+                    individual1.clone()
+                } else { 
+                    local_best_child
                 }
+                
             };
             log_file.write(format!("\nЛучший ребенок: \n").as_ref()).expect("Ошибка записи");
             for el in great_child.0.iter() {
@@ -224,9 +233,9 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_ve
             }
         }
 
-        new_generation.extend(last_generation.iter().cloned());
-        new_generation.sort_by(|a, b| a.1.cmp(&b.1));
-        new_generation.truncate(z as usize);
+        // new_generation.extend(last_generation.iter().cloned());
+        // new_generation.sort_by(|a, b| a.1.cmp(&b.1));
+        // new_generation.truncate(z as usize);
 
         generations.push(new_generation);
         gen_counter += 1;
@@ -246,3 +255,4 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_ve
     best_sum
 }
 
+// Мутация на беск и мы присекаем и с одного комп на другой и присек
