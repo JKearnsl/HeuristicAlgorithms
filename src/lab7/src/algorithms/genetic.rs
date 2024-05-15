@@ -19,7 +19,7 @@ fn calc_phenotype(matrix: &Vec<Vec<u32>>, genotype: &Vec<char>) -> (u32, String)
     (sum, log_str)
 }
 
-pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_vertice: u32) -> u32 {
+pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_vertice: u32) {
     let mut log_file = std::fs::File::create("genetic.log").unwrap();
     let mut rnd = rand::thread_rng();
     let mut generations: Vec<Vec<(Vec<char>, u32)>> = vec![];
@@ -30,9 +30,7 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_ve
         |&x| *x != alphas_vec.get(start_vertice as usize).unwrap().clone()
     ).map(|&x| x).collect();
     let start_alpha = alphas_vec.get(start_vertice as usize).unwrap();
-
-    let mut best_sum: u32 = std::u32::MAX;
-
+    
     log_file.write("\nНачальное поколение: \n".to_string().as_ref()).expect("Ошибка записи");
     let start_generation = {
         let mut generation = vec![];
@@ -220,8 +218,7 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_ve
 
                 let last_gen = generations.last().unwrap();
                 let best_genotype = last_gen.iter().min_by_key(|el| el.1).unwrap().0.clone();
-                let (bs, best_phenotype) = calc_phenotype(matrix, &best_genotype);
-                best_sum = bs;
+                let (_, best_phenotype) = calc_phenotype(matrix, &best_genotype);
                 log_file.write(format!("\nЛучшая особь: \n").as_ref()).expect("Ошибка записи");
                 for el in best_genotype.iter() {
                     log_file.write(format!("{:4}", el).as_ref()).expect("Ошибка записи");
@@ -252,7 +249,6 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32, start_ve
         ).collect(),
         "genetic_genetic".to_string()
     );
-    best_sum
 }
 
 // Мутация на беск и мы присекаем и с одного комп на другой и присек

@@ -243,14 +243,7 @@ fn main() {
             Ok(n) => {
                 match n {
                     1 => {
-                        // Для того чтобы Кобак был счастлив
-                        let greedy_result = algorithms::greedy::main(&matrix, start_vertice);
-                        for _ in 0..2 {
-                            let result = algorithms::genetic::main(&matrix, k, z, p_k, p_m, start_vertice);
-                            if result < greedy_result {
-                                break;
-                            }
-                        }
+                        algorithms::genetic::main(&matrix, k, z, p_k, p_m, start_vertice);
                     }
                     2 => {
                         algorithms::greedy::main(&matrix, start_vertice);
