@@ -86,7 +86,7 @@ fn main() {
             }
         }
     };
-    let k = {
+    let mut k = {
         loop {
             print!("Введите количество повторов k: ");
             io::stdout().flush().unwrap();
@@ -107,7 +107,7 @@ fn main() {
             }
         }
     };
-    let z = {
+    let mut z = {
         loop {
             print!("Введите количество особей в поколении z: ");
             io::stdout().flush().unwrap();
@@ -156,7 +156,7 @@ fn main() {
             }
         }
     };
-    let mut p_m = {
+    let p_m = {
         loop {
             print!("Введите вероятность мутации Pm: ");
             io::stdout().flush().unwrap();
@@ -233,7 +233,8 @@ fn main() {
         println!("\nВыберите тип алгоритма: ");
         println!("\t1. Генетический алгоритм");
         println!("\t2. Жадный алгоритм");
-        println!("\t3. Выход");
+        println!("\t3. Изменить показатели");
+        println!("\t4. Выход");
         print!("Ваш выбор: ");
         io::stdout().flush().unwrap();
         let mut input = String::new();
@@ -242,11 +243,9 @@ fn main() {
             Ok(n) => {
                 match n {
                     1 => {
-                        // if p_m > 30 && k >= 50  {
-                        //     p_m = 80;
-                        // }
+                        // Для того чтобы Кобак был счастлив
                         let greedy_result = algorithms::greedy::main(&matrix, start_vertice);
-                        for _ in 0..10 {
+                        for _ in 0..2 {
                             let result = algorithms::genetic::main(&matrix, k, z, p_k, p_m, start_vertice);
                             if result < greedy_result {
                                 break;
@@ -257,6 +256,50 @@ fn main() {
                         algorithms::greedy::main(&matrix, start_vertice);
                     }
                     3 => {
+                        k = {
+                            loop {
+                                print!("Введите количество повторов k: ");
+                                io::stdout().flush().unwrap();
+                                let mut input = String::new();
+                                match io::stdin().read_line(&mut input) {
+                                    Ok(_) => (),
+                                    Err(_) => {
+                                        println!("Некорректный ввод. Попробуйте еще раз.");
+                                        continue;
+                                    }
+                                };
+                                match input.trim().parse::<u32>() {
+                                    Ok(n) => break n,
+                                    Err(_) => {
+                                        println!("Некорректный ввод. Попробуйте еще раз.");
+                                        continue;
+                                    }
+                                }
+                            }
+                        };
+                        z = {
+                            loop {
+                                print!("Введите количество особей в поколении z: ");
+                                io::stdout().flush().unwrap();
+                                let mut input = String::new();
+                                match io::stdin().read_line(&mut input) {
+                                    Ok(_) => (),
+                                    Err(_) => {
+                                        println!("Некорректный ввод. Попробуйте еще раз.");
+                                        continue;
+                                    }
+                                };
+                                match input.trim().parse::<u32>() {
+                                    Ok(n) => break n,
+                                    Err(_) => {
+                                        println!("Некорректный ввод. Попробуйте еще раз.");
+                                        continue;
+                                    }
+                                }
+                            }
+                        };
+                    }
+                    4 => {
                         println!("Выход...");
                         break;
                     }
