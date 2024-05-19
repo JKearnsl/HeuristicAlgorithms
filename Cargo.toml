@@ -4,5 +4,6 @@ members = [
     "src/lab4",
     "src/lab5",
     "src/lab6",
-    "src/lab7"
+    "src/lab7",
+    "src/lab8",
 ]
