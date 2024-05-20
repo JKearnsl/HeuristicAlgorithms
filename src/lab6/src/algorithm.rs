@@ -52,13 +52,6 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
             }
             columns.into_iter().cycle()
         };
-        let mut counter = {
-            let mut columns_iters = vec![];
-            for i in 0..matrix.len() {
-                columns_iters.push(i);
-            }
-            columns_iters.into_iter().cycle()
-        };
 
         for i in 0..z {
             let mut genotype: Vec<[u8; 3]> = vec![];
