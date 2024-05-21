@@ -61,7 +61,7 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
             for (row_index, el) in column.iter().enumerate() {
                 let (col_index, not_inf_task) = {
                     let mut value = *el;
-                    let mut k = if value == u32::MAX { 0 } else { i as usize };
+                    let mut k = if value == u32::MAX { 0 } else { i as usize % matrix[row_index].len() };
                     loop {
                         value = matrix[row_index][k];
                         if value == u32::MAX && k < matrix[row_index].len() {
@@ -75,7 +75,6 @@ pub fn main(matrix: &Vec<Vec<u32>>, k: u32, z: u32, p_k: u32, p_m: u32) {
                 
                 let value = {
                     let range = byte_slices.get(col_index).unwrap();
-                    println!("Задача: {not_inf_task} row {} -> col {} | range {}..{}", row_index, col_index, range.0, range.1);
                     rnd.gen_range(range.0..range.1)
                 };
                 
